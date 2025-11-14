@@ -20,7 +20,7 @@ const FIELD_OF_VIEW = Math.PI / 3;
 const CAMERA_HEIGHT = 1400;
 const CAMERA_DEPTH = 1 / Math.tan(FIELD_OF_VIEW / 2);
 const PLAYER_Z = CAMERA_DEPTH * CAMERA_HEIGHT;
-const ROAD_WIDTH = 2400;
+const ROAD_WIDTH = 1000;
 const RUMBLE_LENGTH = 3;
 const CURVE_SCALE = 0.0011;
 const MAX_SPEED = SEGMENT_LENGTH * 55;
@@ -372,8 +372,9 @@ function render() {
     let roadWidth1 = 0;
     let roadWidth2 = 0;
     if (p1 && p2) {
-      roadWidth1 = p1.scale * ROAD_WIDTH * 0.5;
-      roadWidth2 = p2.scale * ROAD_WIDTH * 0.5;
+      const halfCanvas = canvas.width / 2;
+      roadWidth1 = p1.scale * ROAD_WIDTH * halfCanvas;
+      roadWidth2 = p2.scale * ROAD_WIDTH * halfCanvas;
     }
 
     projectedSegments[n] = {
@@ -408,7 +409,6 @@ function render() {
     seg.sprites.push({ entity: opponent, percent });
   });
 
-  let clipY = canvas.height;
   for (let n = DRAW_DISTANCE - 1; n >= 0; n -= 1) {
     const projected = projectedSegments[n];
     if (!projected || !projected.valid) {
@@ -417,21 +417,15 @@ function render() {
 
     const { p1, p2, roadWidth1, roadWidth2, index } = projected;
 
-    if (p2.y >= clipY) {
-      continue;
-    }
-
-    clipY = p1.y;
-
     const rumbleWidth1 = roadWidth1 * 1.2;
     const rumbleWidth2 = roadWidth2 * 1.2;
     const laneMarkerWidth1 = roadWidth1 * 0.1;
     const laneMarkerWidth2 = roadWidth2 * 0.1;
 
     const alternating = Math.floor(index / RUMBLE_LENGTH) % 2 === 0;
-    const roadColor = alternating ? "#cda05a" : "#b88c4b";
-    const rumbleColor = alternating ? "#f2f1d5" : "#7b4b2a";
-    const laneColor = "rgba(255, 246, 218, 0.7)";
+    const roadColor = alternating ? "#b67c3a" : "#8f5a2a";
+    const rumbleColor = alternating ? "#f7ecd3" : "#5b3620";
+    const laneColor = "rgba(255, 244, 200, 0.85)";
 
     ctx.fillStyle = rumbleColor;
     ctx.beginPath();
@@ -470,8 +464,6 @@ function render() {
       const spriteX = centerX + roadHalf * entity.offset;
       const spriteWidth = roadHalf * 0.7;
       const spriteHeight = spriteWidth * 0.6;
-
-      if (baseY >= clipY) return;
 
       ctx.fillStyle = entity.color;
       drawRoundedRectPath(
